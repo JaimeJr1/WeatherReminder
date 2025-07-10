@@ -30,7 +30,7 @@ APIKEY = "30dbb2b2fdd187e8d9bccfd80c29145d"
 # - Manejar errores generales
 
 """
-
+#======================FUNCTIONS===================================
 #We will use the Weather Description, the sunrise and sunset, windspeed, humidity
 def obtainWeather(city, api_key):
     URL = f"https://api.weatherstack.com/current?access_key={api_key}"
@@ -44,10 +44,12 @@ def obtainWeather(city, api_key):
     weatherIcon = response["weather_icons"]
     sunrise = response["astro"]["sunrise"]
     sunset = response["astro"]["sunset"]
-    windSpeed = response["wind_speed"]
+    windSpeed = response["wind_speed"] #km/h 
     
     #Finding temperatures from other API
     temps = findTemperatures(lat, lon)
+    finalEmail = temps + f"It will be {weatherInfo} mainly, the sunrise is at {sunrise}, and the sunset will be at {sunset}. Today's windspeed is {windSpeed} km/h!"
+    return [finalEmail, weatherIcon] #Return the email and the weather icon to use in the email
 
 def findTemperatures(lat, lon):
     lowestTemp = 100
@@ -66,11 +68,12 @@ def findTemperatures(lat, lon):
             lowestTemp = temperature
         averageTemp += temperature
     averageTemp = averageTemp // 24
-    #print(lowestTemp, HighestTemp, averageTemp)
 
     date = str(datetime.now()).split(" ")[0]
     email = "Today is " + date + " and the highest temperature will be " + str(HighestTemp) + ", the lowest will be " + str(lowestTemp) + ", and the daily average will be " + str(averageTemp) + "!"
     return email
+
+#====================MAIN===============================
 
 weather_Madrid = obtainWeather("Madrid", APIKEY)
 weather_Atlanta = obtainWeather("Atlanta", APIKEY)
