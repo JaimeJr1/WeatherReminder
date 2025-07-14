@@ -17,7 +17,7 @@ APIKEY = "30dbb2b2fdd187e8d9bccfd80c29145d"
 # FUNCTIONS:
 # ==========================
 
-
+{'request': {'type': 'City', 'query': 'Madrid, Spain', 'language': 'en', 'unit': 'm'}, 'location': {'name': 'Madrid', 'country': 'Spain', 'region': 'Madrid', 'lat': '40.400', 'lon': '-3.683', 'timezone_id': 'Europe/Madrid', 'localtime': '2025-07-12 13:27', 'localtime_epoch': 1752326820, 'utc_offset': '2.0'}, 'current': {'observation_time': '11:27 AM', 'temperature': 24, 'weather_code': 113, 'weather_icons': ['https://cdn.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0001_sunny.png'], 'weather_descriptions': ['Sunny'], 'astro': {'sunrise': '06:55 AM', 'sunset': '09:46 PM', 'moonrise': '11:14 PM', 'moonset': '08:13 AM', 'moon_phase': 'Waning Gibbous', 'moon_illumination': 98}, 'air_quality': {'co': '212.75', 'no2': '6.105', 'o3': '81', 'so2': '1.665', 'pm2_5': '8.325', 'pm10': '14.985', 'us-epa-index': '1', 'gb-defra-index': '1'}, 'wind_speed': 15, 'wind_degree': 222, 'wind_dir': 'SW', 'pressure': 1013, 'precip': 0, 'humidity': 47, 'cloudcover': 25, 'feelslike': 24, 'uv_index': 8, 'visibility': 10, 'is_day': 'yes'}}
 
 # TAREA 4: Función para formatear el reporte
 # - Crear un string bonito con toda la información
@@ -36,20 +36,22 @@ def obtainWeather(city, api_key):
     URL = f"https://api.weatherstack.com/current?access_key={api_key}"
     querystring = {"query": city}
     response = requests.get(URL, params=querystring)
-    lat = float(response["location"]["lat"])
-    lon = float(response["location"]["lon"])
+    data = response.json()
+    #print(data)
+    lat = float(data["location"]["lat"])
+    lon = float(data["location"]["lon"])
 
     #Accessing data
-    weatherInfo = response["weather_descriptions"]
-    weatherIcon = response["weather_icons"]
-    sunrise = response["astro"]["sunrise"]
-    sunset = response["astro"]["sunset"]
-    windSpeed = response["wind_speed"] #km/h 
+    weatherInfo = data["current"]["weather_descriptions"][0]
+    weatherIcon = data["current"]["weather_icons"]
+    sunrise = data["current"]["astro"]["sunrise"]
+    sunset = data["current"]["astro"]["sunset"]
+    windSpeed = data["current"]["wind_speed"] #km/h 
     
     #Finding temperatures from other API
     temps = findTemperatures(lat, lon)
     finalEmail = temps + f"It will be {weatherInfo} mainly, the sunrise is at {sunrise}, and the sunset will be at {sunset}. Today's windspeed is {windSpeed} km/h!"
-    return [finalEmail, weatherIcon] #Return the email and the weather icon to use in the email
+    return [finalEmail, weatherIcon, weatherInfo] #Return the email and the weather icon to use in the email
 
 def findTemperatures(lat, lon):
     lowestTemp = 100
@@ -70,37 +72,70 @@ def findTemperatures(lat, lon):
     averageTemp = averageTemp // 24
 
     date = str(datetime.now()).split(" ")[0]
-    email = "Today is " + date + " and the highest temperature will be " + str(HighestTemp) + ", the lowest will be " + str(lowestTemp) + ", and the daily average will be " + str(averageTemp) + "!"
+    email = "Today is " + date + " and the highest temperature will be " + str(HighestTemp) + ", the lowest will be " + str(lowestTemp) + ", and the daily average will be " + str(averageTemp) + "! "
     return email
 
 #====================MAIN===============================
 
+#weather_Madrid = obtainWeather("Madrid", APIKEY)
+#weather_Atlanta = obtainWeather("Atlanta", APIKEY)
+#print(weather_Atlanta)
+#print(weather_Madrid)
+
+#====================================================
+#                   EMAIL SENDER
+import smtplib, ssl                        # Para enviar emails
+from email.mime.text import MIMEText    # Para crear el contenido del email
+from email.mime.multipart import MIMEMultipart  # Para emails con múltiples partes
+from email.mime.base import MIMEBase    # Para adjuntos (opcional)
+from email import encoders              # Para codificar adjuntos
+from email.message import EmailMessage
+def messageHeader(info):
+    pass
+
+def mensaje_clima_html(datos_clima): #UNA LISTA CON EL TEXTO EN POS 0 Y LA IMG EN POS 1
+    """
+    Crear un HTML bonito con los datos del clima
+    Usar CSS inline para estilos
+    """
+    html = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif;">
+            <h2>🌤️ Pronóstico del Tiempo</h2>
+            <!-- Aquí tu contenido HTML -->
+        </body>
+    </html>
+    """
+    return html
+def enviarEmail(appPassword, smtp_server, port, sender_email, receiver_email, APIKEY):
+    appPassword = "fsub yvnp zwuc fkhx"
+    smtp_server = "smtp.gmail.com"
+    port = 465
+    sender_email = "jaimejr.alonso67@gmail.com"
+    receiver_email = "jaimejr.alonso@gmail.com"
+    info = obtainWeather("Madrid", APIKEY) # [2] is header info for the email subject
+    msg = EmailMessage()
+    msg["Subject"] = messageHeader(info[2])
+    msg["From"] = sender_email
+    msg["To"] = receiver_email
+    msg.set_content(mensaje_clima_html)
+
+    context = ssl.create_default_context() #To encrypt
+    html_message = mensaje_clima_html()
+    msg.add_alternative(html_message, subtype="html", charset="utf-8") #utf 8 to avoid any problems with special characters
+
+
+    print(html_message)
+
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, appPassword)
+        server.send_message(msg)
+        print("Email was sent successfully!")
+    #FUNCIONA!!!!!!!!!!!!!!!
+
+
+# 4. Finalmente formatea todo bonito TODO
+# 5. Prueba cada función por separado antes de juntarlas TODO
+
 weather_Madrid = obtainWeather("Madrid", APIKEY)
-weather_Atlanta = obtainWeather("Atlanta", APIKEY)
-
-# def guardar_reporte(contenido, nombre_archivo):
-#     # Tu código aquí
-#     pass
-
-# def formatear_reporte(datos_clima):
-#     # Tu código aquí
-#     pass
-
-# def main():
-#     # Tu código aquí
-#     pass
-
-# if __name__ == "__main__":
-#     main()
-
-
-# TIPS:
-# =====
-# 1. Empieza haciendo una petición simple y imprime el resultado
-# 2. Luego extrae solo los datos que necesitas
-# 3. Después implementa el guardado en archivo
-# 4. Finalmente formatea todo bonito
-# 5. Prueba cada función por separado antes de juntarlas
-
-#print("Empieza por obtener tu API key y hacer tu primera peticion!")
-#print("Tip: Imprime el JSON completo primero para ver qué datos tienes disponibles")
+print(weather_Madrid)
