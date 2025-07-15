@@ -149,3 +149,5 @@ def main():
     receiverEmails = os.environ.get('RECEIVER_EMAIL')
     apiKey = os.environ.get('WEATHER_API_KEY')
     enviarEmail(cityName, appPassword, senderEmail, receiverEmails, apiKey)
+
+main()
