@@ -8,6 +8,7 @@ from email.mime.base import MIMEBase    # Para adjuntos (opcional)
 from email import encoders              # Para codificar adjuntos
 from email.message import EmailMessage
 import os
+import json
 
 # ============================================================
 
