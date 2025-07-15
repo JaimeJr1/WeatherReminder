@@ -26,7 +26,8 @@ jobs:
     - name: Ejecutar script del clima
       env:
         WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
-        EMAIL_USER: ${{ secrets.EMAIL_USER }}
-        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        RECEIVER_EMAILS: ${{ secrets.RECEIVER_EMAILS }}
+        APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
         CITY: ${{ secrets.CITY }}
       run: python Daily_Weather_News.py
