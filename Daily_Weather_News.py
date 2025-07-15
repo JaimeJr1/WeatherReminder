@@ -143,11 +143,30 @@ def enviarEmail(city, appPassword, sender_email, receiver_emails, APIKEY):
 #======================MAIN============================
 
 def main():
+    print("=== DEBUG START ===")
+    
+    # Leer variable raw
+    receiverEmails_raw = os.environ.get('RECEIVER_EMAILS')
+    print(f"1. Raw value: {receiverEmails_raw}")
+    print(f"2. Type: {type(receiverEmails_raw)}")
+    
+    # Intentar convertir
+    if receiverEmails_raw:
+        try:
+            receiverEmails = json.loads(receiverEmails_raw)
+            print(f"3. After json.loads: {receiverEmails}")
+            print(f"4. Type after conversion: {type(receiverEmails)}")
+        except Exception as e:
+            print(f"3. Error en json.loads: {e}")
+            receiverEmails = None
+    else:
+        print("3. receiverEmails_raw es None o vacío")
+        receiverEmails = None
+    
+    print("=== DEBUG END ===")
     cityName = os.environ.get("CITY_NAME", "Atlanta")
     appPassword = os.environ.get('APP_PASSWORD')
     senderEmail = os.environ.get('SENDER_EMAIL')
-    receiverEmails = os.environ.get('RECEIVER_EMAIL')
-    receiverEmails = json.loads(receiverEmails)
     apiKey = os.environ.get('WEATHER_API_KEY')
     enviarEmail(cityName, appPassword, senderEmail, receiverEmails, apiKey)
 
