@@ -1,0 +1,32 @@
+name: Daily Weather Report
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Every day at 6:00 UTC (7:00 en España en horario de invierno)
+  workflow_dispatch:  # Permite ejecutar manualmente desde GitHub
+
+jobs:
+  enviar-clima:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+    
+    - name: Ejecutar script del clima
+      env:
+        WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+        EMAIL_USER: ${{ secrets.EMAIL_USER }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        CITY: ${{ secrets.CITY }}
+      run: python Daily_Weather_News.py
