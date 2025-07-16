@@ -1,3 +1,4 @@
+#Author Jaime Jr
 #====================IMPORTS==================================
 import requests      # Para hacer peticiones HTTP a APIs
 from datetime import datetime, timedelta  # Para fechas y horas   
